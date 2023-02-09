@@ -30,7 +30,7 @@ class Problem:
         self.solution = f"{action} -> {self.solution}"
 
     def push(self,new_node):
-        self.frontier_queue.put((new_node.get_cost(),new_node))
+        self.frontier_queue.put((new_node.cost,new_node))
         return
     
     def pop(self):
@@ -48,11 +48,14 @@ class Node:
         self.action = action #how did i get here
         self.parent = parent # parent is a reference to Node / if null, then it is seed
         self.game_state = game_state # game state is a 2D np array
-        self.width = int(np.sqrt(len(game_state)))
+        self.width = len(game_state)
         if parent != 0:
             self.cost = parent.get_cost() + self.a_star_euclidean_distance(goal)
         else:
             self.cost = self.a_star_euclidean_distance(goal)
+
+    def __lt__(self,node):
+        return self.cost < node.cost
 
     def get_cost(self):
         return self.cost
@@ -70,62 +73,61 @@ class Node:
                     i = x
                     j = y
                     break
-            break
 
         expand_set = []
         try:
             # test bounds
-            temp = self.game_state[i-1][j-1]
+            temp = self.game_state[i-1][j]
             
             #it is in bounds
-            new_game_state = self.game_state
-            new_game_state[i][j] = new_game_state[i-1][j-1]
-            new_game_state[i-1][j-1] = -1
+            new_game_state = np.array(self.game_state,copy=True)
+            new_game_state[i][j] = new_game_state[i-1][j]
+            new_game_state[i-1][j] = -1
 
-            if new_game_state not in seen_set:
-                expand_set.append(new_game_state)
+            if new_game_state.tobytes() not in seen_set:
+                expand_set.append((new_game_state,"Up"))
         except:
             pass
 
         try:
             # test bounds
-            temp = self.game_state[i-1][j+1]
+            temp = self.game_state[i][j+1]
             
             #it is in bounds
-            new_game_state = self.game_state
-            new_game_state[i][j] = new_game_state[i-1][j+1]
-            new_game_state[i-1][j+1] = -1
+            new_game_state = np.array(self.game_state,copy=True)
+            new_game_state[i][j] = new_game_state[i][j+1]
+            new_game_state[i][j+1] = -1
 
-            if new_game_state not in seen_set:
-                expand_set.append(new_game_state)
+            if new_game_state.tobytes() not in seen_set:
+                expand_set.append((new_game_state,"Right"))
         except:
             pass
 
         try:
             # test bounds
-            temp = self.game_state[i+1][j-1]
+            temp = self.game_state[i+1][j]
             
             #it is in bounds
-            new_game_state = self.game_state
-            new_game_state[i][j] = new_game_state[i+1][j-1]
-            new_game_state[i+1][j-1] = -1
+            new_game_state = np.array(self.game_state,copy=True)
+            new_game_state[i][j] = new_game_state[i+1][j]
+            new_game_state[i+1][j] = -1
 
-            if new_game_state not in seen_set:
-                expand_set.append(new_game_state)
+            if new_game_state.tobytes() not in seen_set:
+                expand_set.append((new_game_state,"Down"))
         except:
             pass
 
         try:
             # test bounds
-            temp = self.game_state[i+1][j+1]
+            temp = self.game_state[i][j-1]
             
             #it is in bounds
-            new_game_state = self.game_state
-            new_game_state[i][j] = new_game_state[i+1][j+1]
-            new_game_state[i+1][j+1] = -1
+            new_game_state = np.array(self.game_state,copy=True)
+            new_game_state[i][j] = new_game_state[i][j-1]
+            new_game_state[i][j-1] = -1
 
-            if new_game_state not in seen_set:
-                expand_set.append(new_game_state)
+            if new_game_state.tobytes() not in seen_set:
+                expand_set.append((new_game_state,"Left"))
         except:
             pass
 
@@ -167,7 +169,7 @@ class Node:
 fakePuzzle = np.array([
     [1,2,3],
     [4,5,6],
-    [7,-1,8]
+    [-1,7,8]
     ])
 
 # n = int(input("Enter the width of the puzzle grid: "))
@@ -216,13 +218,20 @@ def solve(problem):
         leaf = problem.pop()[1]
         
         if (str(leaf.game_state) == str(problem.goal)):
+            #trace up leaf's parents
+            while (str(leaf.game_state) != str(problem.seed.game_state)):
+                problem.prepend_move(leaf.action)
+                leaf = leaf.parent
+            problem.prepend_move(leaf.action)
+            problem.solution = f"{problem.solution} Done"
             return problem.solution
         
         if not problem.is_repeat(leaf.game_state):
             new_nodes = leaf.expand(problem.seen_set)
         
         for node in new_nodes:
-            problem.push(node)
+            new_node = Node(leaf,node[1],node[0],goal)
+            problem.push(new_node)
         
         print(cnt)
         cnt += 1
