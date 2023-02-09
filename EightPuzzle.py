@@ -2,19 +2,11 @@ import sys
 import numpy as np
 import queue
 
-#from docs.python.org###################
-from dataclasses import dataclass, field
-from typing import Any
-
-@dataclass(order=True)
-class PrioritizedItem:
-    priority: int
-    item: Any=field(compare=False)
-########################################
 class Problem:
-    def __init__(solution, goal, self):
+    def __init__(game_state, goal, self):
+        self.seed = Node(0,"Begin",game_state,goal)
         self.goal = goal
-        self.solution = solution
+        self.solution = "" #will be replaced with solution trace i think
         self.frontier_queue = queue.PriorityQueue()
 
     def push(new_node, self):
@@ -155,13 +147,36 @@ fakePuzzle = np.array([
     [7,8,-1]
     ])
 
-n = input("Enter the width of the puzzle grid: ")
+n = int(input("Enter the width of the puzzle grid: "))
 
-num_inputs = n*n-1
+num_inputs = n*n
 
+puzzle = np.arange(num_inputs).reshape(n,n)
 
+goal = puzzle
 
-#pick empty space
-#calculate costs by manhattan distance from correct location
-#its fastest to store this in a 1D array, but that has to translate easily
-#nxn puzzle has nxn slots
+print("Begin inputting puzzle configuration with unique values, and inputting -1 for an empty space")
+for i in range(n):
+    print(f"Row {i+1} inputs: ")
+    print()
+    for j in range(n):
+        puzzle[i][j] = input(f"Enter item {j+1} for row {i+1}: ")
+    print()
+
+print("Given puzzle: ")
+print(puzzle)
+print()
+
+print("Begin inputting goal configuration with unique values, and inputting -1 for an empty space")
+for i in range(n):
+    print(f"Row {i+1} inputs: ")
+    print()
+    for j in range(n):
+        goal[i][j] = input(f"Enter item {j+1} for row {i+1}: ")
+    print()
+
+print("Given goal: ")
+print(goal)
+print()
+
+problem = Problem(puzzle, goal)
