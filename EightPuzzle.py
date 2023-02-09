@@ -1,12 +1,46 @@
 import sys
 import numpy as np
+import queue
+
+#from docs.python.org###################
+from dataclasses import dataclass, field
+from typing import Any
+
+@dataclass(order=True)
+class PrioritizedItem:
+    priority: int
+    item: Any=field(compare=False)
+########################################
+class Problem:
+    def __init__(solution, goal, self):
+        self.goal = goal
+        self.solution = solution
+        self.frontier_queue = queue.PriorityQueue()
+
+    def push(new_node, self):
+        self.frontier_queue.put((new_node.get_cost(),new_node))
+        return
+    
+    def pop(self):
+        return self.frontier_queue.get()
+
+def search_2D(val, array):
+    for y in array:
+        for x in array:
+            if array[y][x] == val:
+                return [y,x]
+    return -1, -1
 
 class Node:
-    def __init__(self, val, parent, game_state):
-        self.value = val #
+    def __init__(self, parent, action, game_state, goal):
+        self.action = action #how did i get here
+        self.cost = parent.get_cost() + self.a_star_euclidean_distance(goal)
         self.parent = parent # parent is a reference to Node / if null, then it is seed
         self.game_state = game_state # game state is a 2D np array
         self.width = np.sqrt(len(game_state))
+
+    def get_cost(self):
+        return self.cost
 
     def expand(seen_set, self):
         # i - 1, i - 1
@@ -83,23 +117,34 @@ class Node:
         return expand_set #array of nodes with all possible unique movements
 
     def uniform_cost_search(self):
-        cost = 0
+        cost = 1
         return cost
     
-    def a_star_misplaced_type(self):
+    def a_star_misplaced_type(goal, self):
+        #flatten is just iterating through all values of an array and placing them in order
+        flat_game_state = np.ndarray.flatten(self.game_state)
+        flat_goal = np.ndarray.flatten(goal)
+        misplaced_count = 0
         
-        return
-    
-    def a_star_euclidean_distance(self):
-        return
-    
-class Node:
-    def __init__(self, val, parent):
-        #cost of self?
-        self.value = val
+        for i, tile in enumerate(flat_game_state):
+            if flat_game_state[i] != flat_goal[i]:
+                misplaced_count += 1
 
-        #parent is null or Node object i think? or separate if i need
-        self.parent = parent
+        return misplaced_count - 1
+    
+    def a_star_euclidean_distance(goal, self):
+        #goal.index(value) game_state.index(value) 
+        #find distance between these two, x2-x1 ^2 + y2-y1 ^2 sqrted
+        cost = 0
+        
+        for i, row in enumerate(goal):
+            for j, val in enumerate(row):
+                game_state_index = search_2D(val,self.game_state)
+                goal_index = [i,j]
+
+                cost += pow(pow(goal_index[0]-game_state_index[0], 2) + pow(goal_index[1]-game_state_index[1],2),.5)
+        
+        return cost
 
 
 
