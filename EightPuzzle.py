@@ -3,11 +3,30 @@ import numpy as np
 import queue
 
 class Problem:
-    def __init__(game_state, goal, self):
+    def __init__(self, game_state, goal):
+        self.seen_set = set()
         self.seed = Node(0,"Begin",game_state,goal)
         self.goal = goal
         self.solution = "" #will be replaced with solution trace i think
         self.frontier_queue = queue.PriorityQueue()
+
+    #returns False if game state is new, True if game state is seen before
+    def is_repeat(game_state, self):
+        before = len(self.seen_set)
+        self.seen_set.add(game_state)
+        after = len(self.seen_set)
+        if (after - before) > 0:
+            return False
+        return True
+    
+    def get_seen(self):
+        return self.seen_set
+
+    def get_seed(self):
+        return self.seed
+    
+    def prepend_move(action, self):
+        self.solution = f"{action} -> {self.solution}"
 
     def push(new_node, self):
         self.frontier_queue.put((new_node.get_cost(),new_node))
@@ -26,7 +45,12 @@ def search_2D(val, array):
 class Node:
     def __init__(self, parent, action, game_state, goal):
         self.action = action #how did i get here
-        self.cost = parent.get_cost() + self.a_star_euclidean_distance(goal)
+        if parent != 0:
+            self.cost = parent.get_cost() + self.a_star_euclidean_distance(goal)
+        else:
+            print("DEBUG GOAL")
+            print(goal)
+            self.cost = self.a_star_euclidean_distance(goal)
         self.parent = parent # parent is a reference to Node / if null, then it is seed
         self.game_state = game_state # game state is a 2D np array
         self.width = np.sqrt(len(game_state))
@@ -106,7 +130,7 @@ class Node:
         except:
             pass
 
-        return expand_set #array of nodes with all possible unique movements
+        return expand_set #list of nodes with all possible unique movements
 
     def uniform_cost_search(self):
         cost = 1
@@ -129,6 +153,7 @@ class Node:
         #find distance between these two, x2-x1 ^2 + y2-y1 ^2 sqrted
         cost = 0
         
+        print(type(goal))
         for i, row in enumerate(goal):
             for j, val in enumerate(row):
                 game_state_index = search_2D(val,self.game_state)
@@ -144,39 +169,63 @@ class Node:
 fakePuzzle = np.array([
     [1,2,3],
     [4,5,6],
-    [7,8,-1]
+    [7,-1,8]
     ])
 
 n = int(input("Enter the width of the puzzle grid: "))
 
 num_inputs = n*n
 
-puzzle = np.arange(num_inputs).reshape(n,n)
+puzzle = fakePuzzle #use for inputs: np.arange(num_inputs).reshape(n,n)
 
-goal = puzzle
+goal = np.array([
+    [1,2,3],
+    [4,5,6],
+    [7,8,-1]
+]) #puzzle
 
-print("Begin inputting puzzle configuration with unique values, and inputting -1 for an empty space")
-for i in range(n):
-    print(f"Row {i+1} inputs: ")
-    print()
-    for j in range(n):
-        puzzle[i][j] = input(f"Enter item {j+1} for row {i+1}: ")
-    print()
+# print("Begin inputting puzzle configuration with unique values, and inputting -1 for an empty space")
+# for i in range(n):
+#     print(f"Row {i+1} inputs: ")
+#     print()
+#     for j in range(n):
+#         puzzle[i][j] = input(f"Enter item {j+1} for row {i+1}: ")
+#     print()
 
 print("Given puzzle: ")
 print(puzzle)
 print()
 
-print("Begin inputting goal configuration with unique values, and inputting -1 for an empty space")
-for i in range(n):
-    print(f"Row {i+1} inputs: ")
-    print()
-    for j in range(n):
-        goal[i][j] = input(f"Enter item {j+1} for row {i+1}: ")
-    print()
+# print("Begin inputting goal configuration with unique values, and inputting -1 for an empty space")
+# for i in range(n):
+#     print(f"Row {i+1} inputs: ")
+#     print()
+#     for j in range(n):
+#         goal[i][j] = input(f"Enter item {j+1} for row {i+1}: ")
+#     print()
 
 print("Given goal: ")
 print(goal)
 print()
 
+def solve(problem):
+
+    seed = problem.get_seed() #seed is the base of the tree
+
+    problem.frontier_queue.push(seed.get_seed())
+    while (True):
+        if problem.frontier_queue.empty():
+            break
+        
+        leaf = problem.pop()
+        if (leaf.game_state == goal):
+            return problem.solution
+        
+        if not problem.is_repeat(leaf.game_state):
+            new_nodes = leaf.expand(problem.seen_set)
+        for node in new_nodes:
+            problem.push(node)
+    return "No solution"
+
 problem = Problem(puzzle, goal)
+solve(problem)
