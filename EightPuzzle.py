@@ -11,9 +11,10 @@ class Problem:
         self.frontier_queue = queue.PriorityQueue()
 
     #returns False if game state is new, True if game state is seen before
-    def is_repeat(game_state, self):
+    def is_repeat(self,game_state):
         before = len(self.seen_set)
-        self.seen_set.add(game_state)
+        hashable_state = game_state.tobytes()
+        self.seen_set.add(hashable_state)
         after = len(self.seen_set)
         if (after - before) > 0:
             return False
@@ -25,10 +26,10 @@ class Problem:
     def get_seed(self):
         return self.seed
     
-    def prepend_move(action, self):
+    def prepend_move(self,action):
         self.solution = f"{action} -> {self.solution}"
 
-    def push(new_node, self):
+    def push(self,new_node):
         self.frontier_queue.put((new_node.get_cost(),new_node))
         return
     
@@ -36,8 +37,8 @@ class Problem:
         return self.frontier_queue.get()
 
 def search_2D(val, array):
-    for y in array:
-        for x in array:
+    for y, _ in enumerate(array):
+        for x,_ in enumerate(array):
             if array[y][x] == val:
                 return [y,x]
     return -1, -1
@@ -45,20 +46,18 @@ def search_2D(val, array):
 class Node:
     def __init__(self, parent, action, game_state, goal):
         self.action = action #how did i get here
+        self.parent = parent # parent is a reference to Node / if null, then it is seed
+        self.game_state = game_state # game state is a 2D np array
+        self.width = int(np.sqrt(len(game_state)))
         if parent != 0:
             self.cost = parent.get_cost() + self.a_star_euclidean_distance(goal)
         else:
-            print("DEBUG GOAL")
-            print(goal)
             self.cost = self.a_star_euclidean_distance(goal)
-        self.parent = parent # parent is a reference to Node / if null, then it is seed
-        self.game_state = game_state # game state is a 2D np array
-        self.width = np.sqrt(len(game_state))
 
     def get_cost(self):
         return self.cost
 
-    def expand(seen_set, self):
+    def expand(self,seen_set):
         # i - 1, i - 1
         # i - 1, i + 1
         # i + 1, i + 1
@@ -136,7 +135,7 @@ class Node:
         cost = 1
         return cost
     
-    def a_star_misplaced_type(goal, self):
+    def a_star_misplaced_type(self, goal):
         #flatten is just iterating through all values of an array and placing them in order
         flat_game_state = np.ndarray.flatten(self.game_state)
         flat_goal = np.ndarray.flatten(goal)
@@ -148,12 +147,11 @@ class Node:
 
         return misplaced_count - 1
     
-    def a_star_euclidean_distance(goal, self):
+    def a_star_euclidean_distance(self, goal):
         #goal.index(value) game_state.index(value) 
         #find distance between these two, x2-x1 ^2 + y2-y1 ^2 sqrted
         cost = 0
         
-        print(type(goal))
         for i, row in enumerate(goal):
             for j, val in enumerate(row):
                 game_state_index = search_2D(val,self.game_state)
@@ -172,9 +170,9 @@ fakePuzzle = np.array([
     [7,-1,8]
     ])
 
-n = int(input("Enter the width of the puzzle grid: "))
+# n = int(input("Enter the width of the puzzle grid: "))
 
-num_inputs = n*n
+# num_inputs = n*n
 
 puzzle = fakePuzzle #use for inputs: np.arange(num_inputs).reshape(n,n)
 
@@ -212,20 +210,26 @@ def solve(problem):
 
     seed = problem.get_seed() #seed is the base of the tree
 
-    problem.frontier_queue.push(seed.get_seed())
+    problem.push(seed)
+    cnt = 0
     while (True):
-        if problem.frontier_queue.empty():
-            break
+        leaf = problem.pop()[1]
         
-        leaf = problem.pop()
-        if (leaf.game_state == goal):
+        if (str(leaf.game_state) == str(problem.goal)):
             return problem.solution
         
         if not problem.is_repeat(leaf.game_state):
             new_nodes = leaf.expand(problem.seen_set)
+        
         for node in new_nodes:
             problem.push(node)
+        
+        print(cnt)
+        cnt += 1
+
+        if problem.frontier_queue.empty():
+            break
     return "No solution"
 
 problem = Problem(puzzle, goal)
-solve(problem)
+print(solve(problem))
