@@ -23,7 +23,7 @@ class Node:
                     break
             break
 
-        expand_set = np.array()
+        expand_set = []
         try:
             # test bounds
             temp = self.game_state[i-1][j-1]
@@ -80,7 +80,7 @@ class Node:
         except:
             pass
 
-        return #array of nodes with all possible unique movements
+        return expand_set #array of nodes with all possible unique movements
 
     def uniform_cost_search(self):
         cost = 0
