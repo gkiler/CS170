@@ -51,8 +51,11 @@ class Node:
         self.width = len(game_state)
         if parent != 0:
             self.cost = parent.get_cost() + self.uniform_cost_search(goal)
+            self.depth = parent.depth + 1
         else:
             self.cost = self.uniform_cost_search(goal)
+            self.depth = 1
+        
 
     def __lt__(self,node):
         return self.cost < node.cost
@@ -210,50 +213,7 @@ impossible = np.array([
     [8,7,-1]
     ]) 
 
-# hardest = np.array([
-#     [8,6,7],
-#     [2,5,4],
-#     [3,-1,1]
-# ])
-
-# n = int(input("Enter the width of the puzzle grid: "))
-
-# num_inputs = n*n
-
-puzzle = ohBoy #use for inputs: np.arange(num_inputs).reshape(n,n)
-
-goal = np.array([
-    [1,2,3],
-    [4,5,6],
-    [7,8,-1]
-]) #puzzle
-
-# print("Begin inputting puzzle configuration with unique values, and inputting -1 for an empty space")
-# for i in range(n):
-#     print(f"Row {i+1} inputs: ")
-#     print()
-#     for j in range(n):
-#         puzzle[i][j] = input(f"Enter item {j+1} for row {i+1}: ")
-#     print()
-
-print("Given puzzle: ")
-print(puzzle)
-print()
-
-# print("Begin inputting goal configuration with unique values, and inputting -1 for an empty space")
-# for i in range(n):
-#     print(f"Row {i+1} inputs: ")
-#     print()
-#     for j in range(n):
-#         goal[i][j] = input(f"Enter item {j+1} for row {i+1}: ")
-#     print()
-
-print("Given goal: ")
-print(goal)
-print()
-
 def solve(problem):
-
     seed = problem.get_seed() #seed is the base of the tree
 
     problem.push(seed)
@@ -262,7 +222,7 @@ def solve(problem):
     max_queue_size = 0
     while (True):
         leaf = problem.pop()[1]
-        
+        print(f'The best state to expand with g(n) = {leaf.depth} and h(n) = {leaf.cost}')
         if (str(leaf.game_state) == str(problem.goal)):
             #trace up leaf's parents
             while (str(leaf.game_state) != str(problem.seed.game_state)):
@@ -276,6 +236,7 @@ def solve(problem):
         if not problem.is_repeat(leaf.game_state):
             expansions += 1
             new_nodes = leaf.expand(problem.seen_set)
+            print(f"Expanding state \n {leaf}")
         
         for node in new_nodes:
             new_node = Node(leaf,node[1],node[0],goal)
@@ -288,26 +249,85 @@ def solve(problem):
         #     print(f"Iterations: {cnt} | Unique States Seen: {len(problem.seen_set)}")
         if problem.frontier_queue.empty():
             break
+    print(f"Max Queue Size: {max_queue_size} | Nodes expanded: {expansions}")
     return f"No solution in {cnt} iterations"
+# hardest = np.array([
+#     [8,6,7],
+#     [2,5,4],
+#     [3,-1,1]
+# ])
 
-problem = Problem(puzzle, goal)
-#trivial
-trivial = Problem(trivial,goal)
-#easy 
-very_easy = Problem(very_easy,goal)
-#very_easy
-doable = Problem(doable,goal)
-#doable
-ohBoy = Problem(ohBoy,goal)
-#ohBoy
-impossible = Problem(impossible,goal)
-#impossible
+n = int(input("Enter the width of the puzzle grid: "))
 
-# print(solve(problem))
+num_inputs = n*n
 
-# i have to manually change heuristics bc i was lazy but its only like two lines
-print(f'trivial: \n{solve(trivial)}')
-print(f'very_easy: \n{solve(very_easy)}')
-print(f'doable: \n{solve(doable)}')
-print(f'ohBoy: \n{solve(ohBoy)}')
-print(f'impossible: \n{solve(impossible)}')
+puzzle = np.arange(num_inputs).reshape(n,n)
+
+goal = np.array([
+    [1,2,3],
+    [4,5,6],
+    [7,8,-1]
+]) #puzzle
+print("Welcome to 862208140 8 Puzzle Solver")
+puzzlechoice = input("Type 1 for default puzzle or 2 for entering your own puzzle:")
+if puzzlechoice == 2:
+    print("Begin inputting puzzle configuration with unique values, and inputting -1 for an empty space")
+    for i in range(n):
+        print(f"Row {i+1} inputs: ")
+        print()
+        for j in range(n):
+            puzzle[i][j] = input(f"Enter item {j+1} for row {i+1}: ")
+        print()
+
+    print("Given puzzle: ")
+    print(puzzle)
+    print()
+
+    # print("Begin inputting goal configuration with unique values, and inputting -1 for an empty space")
+    # for i in range(n):
+    #     print(f"Row {i+1} inputs: ")
+    #     print()
+    #     for j in range(n):
+    #         goal[i][j] = input(f"Enter item {j+1} for row {i+1}: ")
+    #     print()
+
+    print("Given goal: ")
+    print(goal)
+    print()
+
+    
+
+    problem = Problem(puzzle, goal)
+
+    alg = input("Enter your choice of algorithm: \nUniform Cost Search\nA* Misplaced Tile Heuristic\nA* Euclidean Distance Heuristic")
+
+    if alg == 1:
+        print(f'Solution with Uniform Cost Search for given puzzle: {solve(problem)}')
+    elif alg == 2:
+        print(f'Solution with Misplaced Tile Heuristic for given puzzle: {solve(problem)}')
+    elif alg == 3:
+        print(f'Solution with Euclidean Distance Heuristic for given puzzle: {solve(problem)}')
+
+# print(f'Euclidean Distance for given puzzle: {solve(problem)}')
+else:
+    #trivial
+    trivial = Problem(trivial,goal)
+    #easy 
+    very_easy = Problem(very_easy,goal)
+    #very_easy
+    doable = Problem(doable,goal)
+    #doable
+    ohBoy = Problem(ohBoy,goal)
+    #ohBoy
+    impossible = Problem(impossible,goal)
+    #impossible
+
+    # print(solve(problem))
+
+    # i have to manually change heuristics bc i was lazy but its only like two lines
+    print(f'trivial: \n{solve(trivial)}')
+    print(f'very_easy: \n{solve(very_easy)}')
+    print(f'easy: \n{solve(easy)}')
+    print(f'doable: \n{solve(doable)}')
+    print(f'ohBoy: \n{solve(ohBoy)}')
+    print(f'impossible: \n{solve(impossible)}')

@@ -265,12 +265,14 @@ def solve(problem):
         
         if (str(leaf.game_state) == str(problem.goal)):
             #trace up leaf's parents
+            depth = 1
             while (str(leaf.game_state) != str(problem.seed.game_state)):
+                depth += 1
                 problem.prepend_move(leaf.action)
                 leaf = leaf.parent
             problem.prepend_move(leaf.action)
             problem.solution = f"{problem.solution} Done"
-            print(f"Max Queue Size: {max_queue_size} | Nodes expanded: {expansions}")
+            print(f"Solution Depth: {depth} | Max Queue Size: {max_queue_size} | Nodes expanded: {expansions}")
             return problem.solution
         
         if not problem.is_repeat(leaf.game_state):
@@ -288,6 +290,7 @@ def solve(problem):
         #     print(f"Iterations: {cnt} | Unique States Seen: {len(problem.seen_set)}")
         if problem.frontier_queue.empty():
             break
+    print(f"Max Queue Size: {max_queue_size} | Nodes expanded: {expansions}")
     return f"No solution in {cnt} iterations"
 
 problem = Problem(puzzle, goal)
@@ -296,6 +299,7 @@ trivial = Problem(trivial,goal)
 #easy 
 very_easy = Problem(very_easy,goal)
 #very_easy
+easy = Problem(easy,goal)
 doable = Problem(doable,goal)
 #doable
 ohBoy = Problem(ohBoy,goal)
@@ -308,6 +312,7 @@ impossible = Problem(impossible,goal)
 # i have to manually change heuristics bc i was lazy but its only like two lines
 print(f'trivial: \n{solve(trivial)}')
 print(f'very_easy: \n{solve(very_easy)}')
+print(f'easy: \n{solve(easy)}')
 print(f'doable: \n{solve(doable)}')
 print(f'ohBoy: \n{solve(ohBoy)}')
 print(f'impossible: \n{solve(impossible)}')
