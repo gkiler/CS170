@@ -327,6 +327,15 @@ if puzzlechoice == 2:
 # print(f'Euclidean Distance for given puzzle: {solve(problem)}')
 else:
     alg = int(input("Enter your choice of algorithm: \nUniform Cost Search\nA* Misplaced Tile Heuristic\nA* Euclidean Distance Heuristic\n"))
+    problem = Problem(ohBoy, goal,alg)
+    if alg == 1:
+        print(f'Solution with Uniform Cost Search for given puzzle: {solve(problem,alg)}')
+    elif alg == 2:
+        print(f'Solution with Misplaced Tile Heuristic for given puzzle: {solve(problem,alg)}')
+    elif alg == 3:
+        print(f'Solution with Euclidean Distance Heuristic for given puzzle: {solve(problem,alg)}')
+
+    exit()
     #trivial
     trivial = Problem(trivial,goal,alg)
     #easy 
@@ -341,7 +350,6 @@ else:
 
     # print(solve(problem))
 
-    # i have to manually change heuristics bc i was lazy but its only like two lines
     print(f'trivial: \n{solve(trivial,alg)}')
     print(f'very_easy: \n{solve(very_easy,alg)}')
     print(f'easy: \n{solve(easy,alg)}')
