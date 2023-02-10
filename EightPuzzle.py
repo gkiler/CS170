@@ -342,9 +342,9 @@ else:
     # print(solve(problem))
 
     # i have to manually change heuristics bc i was lazy but its only like two lines
-    print(f'trivial: \n{solve(trivial)}')
-    print(f'very_easy: \n{solve(very_easy)}')
-    print(f'easy: \n{solve(easy)}')
-    print(f'doable: \n{solve(doable)}')
-    print(f'ohBoy: \n{solve(ohBoy)}')
-    print(f'impossible: \n{solve(impossible)}')
+    print(f'trivial: \n{solve(trivial,alg)}')
+    print(f'very_easy: \n{solve(very_easy,alg)}')
+    print(f'easy: \n{solve(easy,alg)}')
+    print(f'doable: \n{solve(doable,alg)}')
+    print(f'ohBoy: \n{solve(ohBoy,alg)}')
+    print(f'impossible: \n{solve(impossible,alg)}')
