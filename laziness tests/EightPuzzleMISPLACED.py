@@ -50,9 +50,9 @@ class Node:
         self.game_state = game_state # game state is a 2D np array
         self.width = len(game_state)
         if parent != 0:
-            self.cost = parent.get_cost() + self.uniform_cost_search(goal)
+            self.cost = parent.get_cost() + self.a_star_misplaced_type(goal)
         else:
-            self.cost = self.uniform_cost_search(goal)
+            self.cost = self.a_star_misplaced_type(goal)
 
     def __lt__(self,node):
         return self.cost < node.cost
