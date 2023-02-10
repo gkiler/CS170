@@ -1,0 +1,80 @@
+Enter the width of the puzzle grid: 3
+Welcome to 862208140 8 Puzzle Solver
+Type 1 for default puzzle or 2 for entering your own puzzle:2
+Begin inputting puzzle configuration with unique values, and inputting -1 for an empty space
+Row 1 inputs:
+
+Enter item 1 for row 1: 1
+Enter item 2 for row 1: 2
+Enter item 3 for row 1: 3
+
+Row 2 inputs:
+
+Enter item 1 for row 2: 4
+Enter item 2 for row 2: 8
+Enter item 3 for row 2: -1
+
+Row 3 inputs:
+
+Enter item 1 for row 3: 7
+Enter item 2 for row 3: 6
+Enter item 3 for row 3: 5
+
+Given puzzle:
+[[ 1  2  3]
+ [ 4  8 -1]
+ [ 7  6  5]]
+
+Given goal:
+[[ 1  2  3]
+ [ 4  5  6]
+ [ 7  8 -1]]
+
+Enter your choice of algorithm:
+Uniform Cost Search
+A* Misplaced Tile Heuristic
+A* Euclidean Distance Heuristic
+3
+The best state to expand with g(n) = 1 and h(n) = 4.82842712474619
+Expanding state
+ [[ 1  2  3]
+ [ 4  8 -1]
+ [ 7  6  5]]
+The best state to expand with g(n) = 2 and h(n) = 8.242640687119284
+Expanding state
+ [[ 1  2  3]
+ [ 4  8  5]
+ [ 7  6 -1]]
+The best state to expand with g(n) = 2 and h(n) = 10.485281374238571
+Expanding state
+ [[ 1  2  3]
+ [ 4 -1  8]
+ [ 7  6  5]]
+The best state to expand with g(n) = 2 and h(n) = 11.65685424949238
+Expanding state
+ [[ 1  2 -1]
+ [ 4  8  3]
+ [ 7  6  5]]
+The best state to expand with g(n) = 3 and h(n) = 12.242640687119284
+Expanding state
+ [[ 1  2  3]
+ [ 4  8  5]
+ [ 7 -1  6]]
+The best state to expand with g(n) = 3 and h(n) = 15.313708498984761
+Expanding state
+ [[ 1  2  3]
+ [ 4  6  8]
+ [ 7 -1  5]]
+The best state to expand with g(n) = 4 and h(n) = 15.65685424949238
+Expanding state
+ [[ 1  2  3]
+ [ 4 -1  5]
+ [ 7  8  6]]
+The best state to expand with g(n) = 5 and h(n) = 17.65685424949238
+Expanding state
+ [[ 1  2  3]
+ [ 4  5 -1]
+ [ 7  8  6]]
+The best state to expand with g(n) = 6 and h(n) = 17.65685424949238
+Max Queue Size: 10 | Nodes expanded: 8
+Solution with Euclidean Distance Heuristic for given puzzle: Begin -> 5 Up -> 6 Right -> 8 Down -> 5 Left -> 6 Up ->  Done

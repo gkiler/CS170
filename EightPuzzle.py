@@ -3,9 +3,9 @@ import numpy as np
 import queue
 
 class Problem:
-    def __init__(self, game_state, goal):
+    def __init__(self, game_state, goal,alg):
         self.seen_set = set()
-        self.seed = Node(0,"Begin",game_state,goal)
+        self.seed = Node(0,"Begin",game_state,goal,alg)
         self.goal = goal
         self.solution = "" #will be replaced with solution trace i think
         self.frontier_queue = queue.PriorityQueue()
@@ -44,17 +44,33 @@ def search_2D(val, array):
     return -1, -1
 
 class Node:
-    def __init__(self, parent, action, game_state, goal):
+    def __init__(self, parent, action, game_state, goal, alg):
         self.action = action #how did i get here
         self.parent = parent # parent is a reference to Node / if null, then it is seed
         self.game_state = game_state # game state is a 2D np array
         self.width = len(game_state)
-        if parent != 0:
-            self.cost = parent.get_cost() + self.uniform_cost_search(goal)
-            self.depth = parent.depth + 1
+        if alg == 1:
+            if parent != 0:
+                self.cost = parent.get_cost() + self.uniform_cost_search(goal)
+                self.depth = parent.depth + 1
+            else:
+                self.cost = self.uniform_cost_search(goal)
+                self.depth = 1
+        elif alg == 2:
+            if parent != 0:
+                self.cost = parent.get_cost() + self.a_star_misplaced_type(goal)
+                self.depth = parent.depth + 1
+            else:
+                self.cost = self.a_star_misplaced_type(goal)
+                self.depth = 1
         else:
-            self.cost = self.uniform_cost_search(goal)
-            self.depth = 1
+            if parent != 0:
+                self.cost = parent.get_cost() + self.a_star_euclidean_distance(goal)
+                self.depth = parent.depth + 1
+            else:
+                self.cost = self.a_star_euclidean_distance(goal)
+                self.depth = 1
+        
         
 
     def __lt__(self,node):
@@ -213,7 +229,7 @@ impossible = np.array([
     [8,7,-1]
     ]) 
 
-def solve(problem):
+def solve(problem,alg):
     seed = problem.get_seed() #seed is the base of the tree
 
     problem.push(seed)
@@ -236,10 +252,10 @@ def solve(problem):
         if not problem.is_repeat(leaf.game_state):
             expansions += 1
             new_nodes = leaf.expand(problem.seen_set)
-            print(f"Expanding state \n {leaf}")
+            print(f"Expanding state \n {leaf.game_state}")
         
         for node in new_nodes:
-            new_node = Node(leaf,node[1],node[0],goal)
+            new_node = Node(leaf,node[1],node[0],goal,alg)
             problem.push(new_node)
         
         max_queue_size = max(max_queue_size,problem.frontier_queue.qsize())
@@ -269,7 +285,7 @@ goal = np.array([
     [7,8,-1]
 ]) #puzzle
 print("Welcome to 862208140 8 Puzzle Solver")
-puzzlechoice = input("Type 1 for default puzzle or 2 for entering your own puzzle:")
+puzzlechoice = int(input("Type 1 for default puzzle or 2 for entering your own puzzle:"))
 if puzzlechoice == 2:
     print("Begin inputting puzzle configuration with unique values, and inputting -1 for an empty space")
     for i in range(n):
@@ -297,29 +313,30 @@ if puzzlechoice == 2:
 
     
 
-    problem = Problem(puzzle, goal)
+    
 
-    alg = input("Enter your choice of algorithm: \nUniform Cost Search\nA* Misplaced Tile Heuristic\nA* Euclidean Distance Heuristic")
-
+    alg = int(input("Enter your choice of algorithm: \nUniform Cost Search\nA* Misplaced Tile Heuristic\nA* Euclidean Distance Heuristic\n"))
+    problem = Problem(puzzle, goal,alg)
     if alg == 1:
-        print(f'Solution with Uniform Cost Search for given puzzle: {solve(problem)}')
+        print(f'Solution with Uniform Cost Search for given puzzle: {solve(problem,alg)}')
     elif alg == 2:
-        print(f'Solution with Misplaced Tile Heuristic for given puzzle: {solve(problem)}')
+        print(f'Solution with Misplaced Tile Heuristic for given puzzle: {solve(problem,alg)}')
     elif alg == 3:
-        print(f'Solution with Euclidean Distance Heuristic for given puzzle: {solve(problem)}')
+        print(f'Solution with Euclidean Distance Heuristic for given puzzle: {solve(problem,alg)}')
 
 # print(f'Euclidean Distance for given puzzle: {solve(problem)}')
 else:
+    alg = int(input("Enter your choice of algorithm: \nUniform Cost Search\nA* Misplaced Tile Heuristic\nA* Euclidean Distance Heuristic\n"))
     #trivial
-    trivial = Problem(trivial,goal)
+    trivial = Problem(trivial,goal,alg)
     #easy 
-    very_easy = Problem(very_easy,goal)
+    very_easy = Problem(very_easy,goal,alg)
     #very_easy
-    doable = Problem(doable,goal)
+    doable = Problem(doable,goal,alg)
     #doable
-    ohBoy = Problem(ohBoy,goal)
+    ohBoy = Problem(ohBoy,goal,alg)
     #ohBoy
-    impossible = Problem(impossible,goal)
+    impossible = Problem(impossible,goal,alg)
     #impossible
 
     # print(solve(problem))
