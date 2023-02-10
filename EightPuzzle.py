@@ -50,9 +50,9 @@ class Node:
         self.game_state = game_state # game state is a 2D np array
         self.width = len(game_state)
         if parent != 0:
-            self.cost = parent.get_cost() + self.a_star_euclidean_distance(goal)
+            self.cost = parent.get_cost() + self.uniform_cost_search(goal)
         else:
-            self.cost = self.a_star_euclidean_distance(goal)
+            self.cost = self.uniform_cost_search(goal)
 
     def __lt__(self,node):
         return self.cost < node.cost
@@ -77,7 +77,9 @@ class Node:
         expand_set = []
         try:
             # test bounds
-            temp = self.game_state[i-1][j]
+            if i == 0:
+                raise Exception
+            # temp = self.game_state[i-1][j]
             
             #it is in bounds
             new_game_state = np.array(self.game_state,copy=True)
@@ -85,13 +87,15 @@ class Node:
             new_game_state[i-1][j] = -1
 
             if new_game_state.tobytes() not in seen_set:
-                expand_set.append((new_game_state,"Up"))
+                expand_set.append((new_game_state,f"{new_game_state[i][j]} Down"))
         except:
             pass
 
         try:
             # test bounds
-            temp = self.game_state[i][j+1]
+            if j == 2:
+                raise Exception
+            # temp = self.game_state[i][j+1]
             
             #it is in bounds
             new_game_state = np.array(self.game_state,copy=True)
@@ -99,13 +103,15 @@ class Node:
             new_game_state[i][j+1] = -1
 
             if new_game_state.tobytes() not in seen_set:
-                expand_set.append((new_game_state,"Right"))
+                expand_set.append((new_game_state,f"{new_game_state[i][j]} Left"))
         except:
             pass
 
         try:
             # test bounds
-            temp = self.game_state[i+1][j]
+            if i == 2:
+                raise Exception
+            # temp = self.game_state[i+1][j]
             
             #it is in bounds
             new_game_state = np.array(self.game_state,copy=True)
@@ -113,27 +119,29 @@ class Node:
             new_game_state[i+1][j] = -1
 
             if new_game_state.tobytes() not in seen_set:
-                expand_set.append((new_game_state,"Down"))
+                expand_set.append((new_game_state,f"{new_game_state[i][j]} Up"))
         except:
             pass
 
         try:
             # test bounds
-            temp = self.game_state[i][j-1]
-            
+            if j == 0:
+                raise Exception
+            # temp = self.game_state[i][j-1]
+            # print(temp)
             #it is in bounds
             new_game_state = np.array(self.game_state,copy=True)
             new_game_state[i][j] = new_game_state[i][j-1]
             new_game_state[i][j-1] = -1
 
             if new_game_state.tobytes() not in seen_set:
-                expand_set.append((new_game_state,"Left"))
+                expand_set.append((new_game_state,f"{new_game_state[i][j]} Right"))
         except:
             pass
 
         return expand_set #list of nodes with all possible unique movements
 
-    def uniform_cost_search(self):
+    def uniform_cost_search(self,goal):
         cost = 1
         return cost
     
@@ -166,17 +174,53 @@ class Node:
 
 
 #import initial state in order left to right top down
-fakePuzzle = np.array([
+trivial = np.array([
     [1,2,3],
     [4,5,6],
-    [-1,7,8]
+    [7,8,-1]
     ])
+
+easy = np.array([
+    [1,2,-1],
+    [4,5,3],
+    [7,8,6]
+    ])
+
+very_easy = np.array([
+    [1,2,3],
+    [4,5,6],
+    [7,-1,8]
+    ])
+    
+doable = np.array([
+    [-1,1,2],
+    [4,5,3],
+    [7,8,6]
+    ])
+
+ohBoy = np.array([
+    [8,7,1],
+    [6,-1,2],
+    [5,4,3]
+    ])
+
+impossible = np.array([
+    [1,2,3],
+    [4,5,6],
+    [8,7,-1]
+    ]) 
+
+# hardest = np.array([
+#     [8,6,7],
+#     [2,5,4],
+#     [3,-1,1]
+# ])
 
 # n = int(input("Enter the width of the puzzle grid: "))
 
 # num_inputs = n*n
 
-puzzle = fakePuzzle #use for inputs: np.arange(num_inputs).reshape(n,n)
+puzzle = ohBoy #use for inputs: np.arange(num_inputs).reshape(n,n)
 
 goal = np.array([
     [1,2,3],
@@ -214,6 +258,8 @@ def solve(problem):
 
     problem.push(seed)
     cnt = 0
+    expansions = 0
+    max_queue_size = 0
     while (True):
         leaf = problem.pop()[1]
         
@@ -224,21 +270,38 @@ def solve(problem):
                 leaf = leaf.parent
             problem.prepend_move(leaf.action)
             problem.solution = f"{problem.solution} Done"
+            print(f"Max Queue Size: {max_queue_size} | Nodes expanded: {expansions}")
             return problem.solution
         
         if not problem.is_repeat(leaf.game_state):
+            expansions += 1
             new_nodes = leaf.expand(problem.seen_set)
         
         for node in new_nodes:
             new_node = Node(leaf,node[1],node[0],goal)
             problem.push(new_node)
         
-        print(cnt)
-        cnt += 1
-
+        max_queue_size = max(max_queue_size,problem.frontier_queue.qsize())
+        # print(cnt)
+        # cnt += 1
+        # if cnt % 10000 == 0:
+        #     print(f"Iterations: {cnt} | Unique States Seen: {len(problem.seen_set)}")
         if problem.frontier_queue.empty():
             break
-    return "No solution"
+    return f"No solution in {cnt} iterations"
 
 problem = Problem(puzzle, goal)
-print(solve(problem))
+#trivial
+trivial = Problem(trivial,goal)
+#easy 
+very_easy = Problem(very_easy,goal)
+#very_easy
+doable = Problem(doable,goal)
+#doable
+ohBoy = Problem(ohBoy,goal)
+#ohBoy
+impossible = Problem(impossible,goal)
+#impossible
+
+# print(solve(problem))
+print(f'trivial: \n{solve(trivial)}')
